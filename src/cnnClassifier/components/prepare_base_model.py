@@ -4,6 +4,7 @@ from zipfile import ZipFile
 import tensorflow as tf
 from pathlib import Path
 from cnnClassifier.entity.config_entity import PrepareBaseModelConfig
+from tensorflow.keras.metrics import AUC, Precision, Recall
                                                 
 
 
@@ -45,10 +46,21 @@ class PrepareBaseModel:
             outputs=prediction
         )
 
+        # full_model.compile(
+        #     optimizer=tf.keras.optimizers.SGD(learning_rate=learning_rate),
+        #     loss=tf.keras.losses.CategoricalCrossentropy(),
+        #     metrics=["accuracy"]
+        # )
         full_model.compile(
             optimizer=tf.keras.optimizers.SGD(learning_rate=learning_rate),
             loss=tf.keras.losses.CategoricalCrossentropy(),
-            metrics=["accuracy"]
+            metrics=[
+                "accuracy",
+                AUC(name="auc"),
+                Precision(name="precision"),
+                Recall(name="recall"),                  # micro 召回（整体）
+                Recall(class_id=1, name="recall_non"), # 只看 Non-COVID-19（索引1）
+            ],
         )
 
         full_model.summary()
